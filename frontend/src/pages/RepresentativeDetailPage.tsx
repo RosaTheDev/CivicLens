@@ -46,8 +46,8 @@ export default function RepresentativeDetailPage() {
   const [togglingWatchlist, setTogglingWatchlist] = useState(false)
 
   function authHeaders(extra?: HeadersInit): HeadersInit {
-    const headers: HeadersInit = { ...(extra || {}) }
-    if (token) headers['Authorization'] = `Bearer ${token}`
+    const headers = new Headers(extra as HeadersInit | undefined)
+    if (token) headers.set('Authorization', `Bearer ${token}`)
     return headers
   }
 
@@ -193,7 +193,11 @@ export default function RepresentativeDetailPage() {
             <Avatar radius="xl" color="blue" size="lg">
               {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
             </Avatar>
-            <Button variant={onWatchlist ? 'outline' : 'filled'} onClick={handleWatchlist}>
+            <Button
+              variant={onWatchlist ? 'outline' : 'filled'}
+              onClick={handleWatchlist}
+              disabled={togglingWatchlist}
+            >
               {onWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
             </Button>
           </Group>

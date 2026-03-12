@@ -19,7 +19,7 @@ function renderWatchlist() {
 
 describe('WatchlistPage', () => {
   it('shows empty message when watchlist is empty', async () => {
-    vi.spyOn(global, 'fetch')
+    vi.spyOn(globalThis, 'fetch')
       // first call: watchlist
       .mockResolvedValueOnce({
         ok: true,
@@ -38,7 +38,7 @@ describe('WatchlistPage', () => {
     const items = [
       { id: 1, name: 'Jane Smith', chamber: 'HOUSE', state: 'CA', district: '12', party: 'DEMOCRATIC' },
     ]
-    vi.spyOn(global, 'fetch')
+    vi.spyOn(globalThis, 'fetch')
       // watchlist
       .mockResolvedValueOnce({
         ok: true,

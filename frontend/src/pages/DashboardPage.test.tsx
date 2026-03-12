@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { MantineProvider } from '@mantine/core'
@@ -28,7 +28,7 @@ describe('DashboardPage', () => {
     const reps = [
       { id: 1, name: 'Jane Smith', chamber: 'HOUSE', state: 'CA', district: '12', party: 'DEMOCRATIC' },
     ]
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
       json: async () => reps,
     } as any)

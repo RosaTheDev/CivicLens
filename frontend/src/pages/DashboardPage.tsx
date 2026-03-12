@@ -82,8 +82,15 @@ export default function DashboardPage() {
         <Text c="dimmed">No representatives found for this ZIP. Try 94110 or 10001 for demo data.</Text>
       )}
       <Stack gap="sm">
-        {representatives.map((rep: { id: string; name: string; chamber: string; state: string; district?: string; party?: string }) => (
-          <Card key={rep.id} withBorder padding="md" component={Link} to={`/representatives/${rep.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        {representatives.map((rep) => (
+          <Card
+            key={rep.id}
+            withBorder
+            padding="md"
+            component={Link}
+            to={`/representatives/${rep.id}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <Group justify="space-between">
               <div>
                 <Text fw={600}>{rep.name}</Text>

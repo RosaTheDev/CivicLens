@@ -1,21 +1,26 @@
 import { describe, it, expect, vi } from 'vitest'
-import { screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { MantineProvider } from '@mantine/core'
 import RepresentativeDetailPage from './RepresentativeDetailPage'
 import { AuthProvider } from '../context/AuthContext'
-import { render } from '../test/test-utils'
+
+function renderDetail() {
+  return render(
+    <MantineProvider>
+      <AuthProvider>
+        <MemoryRouter initialEntries={['/representatives/1']}>
+          <Routes>
+            <Route path="/representatives/:id" element={<RepresentativeDetailPage />} />
+          </Routes>
+        </MemoryRouter>
+      </AuthProvider>
+    </MantineProvider>,
+  )
+}
 
 describe('RepresentativeDetailPage', () => {
   it('renders representative info, donor summary, stance text and recent bills', async () => {
-    vi.mock('react-router-dom', async (orig) => {
-      const actual = await orig()
-      return {
-        ...actual,
-        useParams: () => ({ id: '1' }),
-        Link: (props: any) => <a href={props.to}>{props.children}</a>,
-      }
-    })
-
     const rep = {
       id: 1,
       name: 'Jane Smith',
@@ -47,7 +52,7 @@ describe('RepresentativeDetailPage', () => {
       note: null,
     }
 
-    vi.spyOn(global, 'fetch')
+    vi.spyOn(globalThis, 'fetch')
       // representative
       .mockResolvedValueOnce({
         ok: true,
@@ -74,13 +79,7 @@ describe('RepresentativeDetailPage', () => {
         json: async () => stance,
       } as any)
 
-    render(
-      <MantineProvider>
-        <AuthProvider>
-          <RepresentativeDetailPage />
-        </AuthProvider>
-      </MantineProvider>,
-    )
+    renderDetail()
 
     expect(await screen.findByText('Jane Smith')).toBeInTheDocument()
     expect(screen.getByText(/Donor summary/i)).toBeInTheDocument()
@@ -89,15 +88,6 @@ describe('RepresentativeDetailPage', () => {
   })
 
   it('saves stance and note and shows note instead of stance text', async () => {
-    vi.mock('react-router-dom', async (orig) => {
-      const actual = await orig()
-      return {
-        ...actual,
-        useParams: () => ({ id: '1' }),
-        Link: (props: any) => <a href={props.to}>{props.children}</a>,
-      }
-    })
-
     const rep = {
       id: 1,
       name: 'Jane Smith',
@@ -108,7 +98,7 @@ describe('RepresentativeDetailPage', () => {
       officialUrl: 'https://example.com/jane',
     }
 
-    vi.spyOn(global, 'fetch')
+    vi.spyOn(globalThis, 'fetch')
       // initial representative load
       .mockResolvedValueOnce({
         ok: true,
@@ -140,13 +130,7 @@ describe('RepresentativeDetailPage', () => {
         json: async () => ({}),
       } as any)
 
-    render(
-      <MantineProvider>
-        <AuthProvider>
-          <RepresentativeDetailPage />
-        </AuthProvider>
-      </MantineProvider>,
-    )
+    renderDetail()
 
     expect(await screen.findByText('Jane Smith')).toBeInTheDocument()
 
