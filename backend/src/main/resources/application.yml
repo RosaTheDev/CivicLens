@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: civiclens-backend
+  datasource:
+    url: jdbc:postgresql://localhost:55432/civiclens
+    username: civiclens
+    password: civiclens
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+    defer-datasource-initialization: true
+
+server:
+  port: 8080
+
+# JWT (override in production with env)
+civiclens:
+  jwt:
+    secret: ${JWT_SECRET:your-256-bit-secret-change-in-production-must-be-at-least-32-chars}
+    expiration-ms: 86400000
+  congress:
+    api-base-url: https://api.congress.gov/v3
+    api-key: ${CONGRESS_API_KEY:}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
