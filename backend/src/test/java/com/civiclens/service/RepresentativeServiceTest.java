@@ -1,5 +1,7 @@
 package com.civiclens.service;
 
+import com.civiclens.client.CongressGovClient;
+import com.civiclens.client.LegislatorPhotoClient;
 import com.civiclens.domain.Chamber;
 import com.civiclens.domain.Party;
 import com.civiclens.domain.Representative;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +29,10 @@ class RepresentativeServiceTest {
     private RepresentativeRepository representativeRepository;
     @Mock
     private RepresentativeEnrichmentService enrichmentService;
+    @Mock
+    private CongressGovClient congressGovClient;
+    @Mock
+    private LegislatorPhotoClient legislatorPhotoClient;
 
     @InjectMocks
     private RepresentativeService representativeService;
@@ -68,5 +75,18 @@ class RepresentativeServiceTest {
     void getById_returnsNullWhenNotFound() {
         when(representativeRepository.findById(999L)).thenReturn(Optional.empty());
         assertThat(representativeService.getById(999L)).isNull();
+    }
+
+    @Test
+    void getById_usesFallbackPhotoSourceWhenCongressPhotoMissing() {
+        Representative rep = Representative.builder().id(1L).name("Jane Smith").chamber(Chamber.HOUSE).state("CA").district("12").build();
+        when(representativeRepository.findById(1L)).thenReturn(Optional.of(rep));
+        when(congressGovClient.fetchMemberPhotoUrl(rep)).thenReturn(null);
+        when(legislatorPhotoClient.fetchMemberPhotoUrl(rep)).thenReturn("https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275/S000001.jpg");
+
+        Representative result = representativeService.getById(1L);
+
+        assertThat(result.getPhotoUrl()).isEqualTo("https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275/S000001.jpg");
+        verify(representativeRepository).save(rep);
     }
 }

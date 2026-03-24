@@ -5,7 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import RepresentativeDetailPage from './pages/RepresentativeDetailPage'
 import WatchlistPage from './pages/WatchlistPage'
-import { AppShell, Group, Text, Button, Stack } from '@mantine/core'
+import { AppShell, Group, Text, Button, Stack, Container, Badge } from '@mantine/core'
 import { Link } from 'react-router-dom'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -17,17 +17,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function Layout({ children }: { children: React.ReactNode }) {
   const { token, logout } = useAuth()
   return (
-    <AppShell header={{ height: 56 }} padding="md">
-      <AppShell.Header>
+    <AppShell header={{ height: 64 }} padding="md">
+      <AppShell.Header
+        style={{
+          borderBottom: '1px solid var(--mantine-color-gray-3)',
+          background:
+            'linear-gradient(90deg, color-mix(in srgb, var(--mantine-color-blue-0) 55%, white), color-mix(in srgb, var(--mantine-color-cyan-0) 35%, white))',
+        }}
+      >
         <Group h="100%" px="md" justify="space-between">
           <Text fw={700} size="lg" component={Link} to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
             CivicLens
           </Text>
           {token ? (
             <Group>
-              <Button component={Link} to="/" variant="subtle" size="sm">Dashboard</Button>
-              <Button component={Link} to="/watchlist" variant="subtle" size="sm">My Watchlist</Button>
-              <Button variant="light" size="sm" onClick={logout}>Logout</Button>
+              <Button component={Link} to="/" variant="default" size="sm">Dashboard</Button>
+              <Button component={Link} to="/watchlist" variant="default" size="sm">My Watchlist</Button>
+              <Button variant="filled" size="sm" color="gray" onClick={logout}>Logout</Button>
             </Group>
           ) : (
             <Group>
@@ -38,7 +44,12 @@ function Layout({ children }: { children: React.ReactNode }) {
         </Group>
       </AppShell.Header>
       <AppShell.Main>
-        <Stack gap="md">{children}</Stack>
+        <Container size="lg" py="md">
+          <Stack gap="md">
+            <Badge variant="light" color="blue" w="fit-content">Civic transparency made simple</Badge>
+            {children}
+          </Stack>
+        </Container>
       </AppShell.Main>
     </AppShell>
   )

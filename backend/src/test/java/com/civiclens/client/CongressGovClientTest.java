@@ -98,5 +98,33 @@ class CongressGovClientTest {
         assertThat(bill.description).contains("Passed the House");
         assertThat(bill.congressGovUrl).isEqualTo("https://www.congress.gov/bill/118th-congress/hr/1");
     }
+
+    @Test
+    void fetchMemberPhotoUrl_returnsDepictionUrlWhenAvailable() throws Exception {
+        ReflectionTestUtils.setField(client, "apiKey", "test-key");
+        ReflectionTestUtils.setField(client, "apiBaseUrl", "https://api.congress.gov/v3");
+
+        Representative rep = sampleRep();
+
+        String memberJson = """
+            {
+              "members": [
+                {
+                  "invertedOrderName": "Smith, Jane",
+                  "state": "California",
+                  "terms": { "item": { "chamber": "House of Representatives" } },
+                  "bioguideId": "S000001",
+                  "depiction": { "imageUrl": "https://example.com/jane.jpg" }
+                }
+              ]
+            }
+            """;
+
+        when(restTemplate.getForObject(any(URI.class), (Class<String>) any()))
+                .thenReturn(memberJson);
+
+        String result = client.fetchMemberPhotoUrl(rep);
+        assertThat(result).isEqualTo("https://example.com/jane.jpg");
+    }
 }
 

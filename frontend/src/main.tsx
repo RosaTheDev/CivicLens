@@ -8,7 +8,13 @@ import '@mantine/core/styles.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MantineProvider>
+    <MantineProvider
+      theme={{
+        primaryColor: 'blue',
+        defaultRadius: 'md',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+      }}
+    >
       <BrowserRouter>
         <AuthProvider>
           <App />

@@ -2,9 +2,9 @@ spring:
   application:
     name: civiclens-backend
   datasource:
-    url: jdbc:postgresql://localhost:55432/civiclens
-    username: civiclens
-    password: civiclens
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:55432/${CIVICLENS_DB_NAME:civiclens}}
+    username: ${SPRING_DATASOURCE_USERNAME:${CIVICLENS_DB_USER:civiclens}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${CIVICLENS_DB_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
   sql:
     init:

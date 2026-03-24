@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TextInput, Button, Stack, Card, Group, Text, Badge, Loader } from '@mantine/core'
+import { TextInput, Button, Stack, Card, Group, Text, Badge, Loader, Avatar } from '@mantine/core'
 import { Link } from 'react-router-dom'
 
 type Representative = {
@@ -9,6 +9,7 @@ type Representative = {
   state: string
   district?: string | null
   party?: string | null
+  photoUrl?: string | null
 }
 
 export default function DashboardPage() {
@@ -66,7 +67,10 @@ export default function DashboardPage() {
 
   return (
     <Stack gap="md">
-      <Text fw={600} size="lg">Find your representatives</Text>
+      <div>
+        <Text fw={700} size="xl">Find your representatives</Text>
+        <Text size="sm" c="dimmed">Search by ZIP code to see who represents you and explore their details.</Text>
+      </div>
       <Group>
         <TextInput
           placeholder="Enter ZIP code"
@@ -87,20 +91,31 @@ export default function DashboardPage() {
             key={rep.id}
             withBorder
             padding="md"
+            radius="md"
+            shadow="xs"
             component={Link}
             to={`/representatives/${rep.id}`}
-            style={{ textDecoration: 'none', color: 'inherit' }}
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              background: 'color-mix(in srgb, var(--mantine-color-blue-0) 20%, white)',
+            }}
           >
             <Group justify="space-between">
-              <div>
-                <Text fw={600}>{rep.name}</Text>
-                <Group gap="xs">
-                  <Badge size="sm" variant="light">{rep.chamber}</Badge>
-                  <Badge size="sm" variant="outline">{rep.state}</Badge>
-                  {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
-                  {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
-                </Group>
-              </div>
+              <Group gap="sm">
+                <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
+                  {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                </Avatar>
+                <div>
+                  <Text fw={600}>{rep.name}</Text>
+                  <Group gap="xs">
+                    <Badge size="sm" variant="light">{rep.chamber}</Badge>
+                    <Badge size="sm" variant="outline">{rep.state}</Badge>
+                    {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
+                    {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
+                  </Group>
+                </div>
+              </Group>
             </Group>
           </Card>
         ))}

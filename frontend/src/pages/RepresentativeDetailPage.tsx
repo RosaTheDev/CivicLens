@@ -11,6 +11,7 @@ type Representative = {
   district?: string | null
   party?: string | null
   officialUrl?: string | null
+  photoUrl?: string | null
 }
 
 type DonorSummary = {
@@ -155,6 +156,8 @@ export default function RepresentativeDetailPage() {
       <Card
         withBorder
         padding="lg"
+        radius="md"
+        shadow="xs"
         style={{
           borderColor:
             savedStance === 'SUPPORT'
@@ -190,7 +193,7 @@ export default function RepresentativeDetailPage() {
             ) : null}
           </div>
           <Group gap="sm">
-            <Avatar radius="xl" color="blue" size="lg">
+            <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue" size="lg">
               {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
             </Avatar>
             <Button

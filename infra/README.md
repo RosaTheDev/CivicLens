@@ -11,10 +11,10 @@ docker compose up -d
 Default connection (used by backend when running locally):
 
 - Host: `localhost`
-- Port: `5432`
-- Database: `civiclens`
-- User: `civiclens`
-- Password: `civiclens`
+- Port: `55432`
+- Database: from `CIVICLENS_DB_NAME` (default: `civiclens`)
+- User: from `CIVICLENS_DB_USER` (default: `civiclens`)
+- Password: from `CIVICLENS_DB_PASSWORD` (required)
 
 To stop:
 

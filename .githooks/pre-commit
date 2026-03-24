@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] gitleaks is not installed. Install it and retry commit."
+  exit 1
+fi
+
+echo "[pre-commit] Running gitleaks secret scan on staged changes..."
+
+if gitleaks help git >/dev/null 2>&1; then
+  gitleaks git --staged --redact
+else
+  gitleaks protect --staged --redact
+fi
+
+echo "[pre-commit] Secret scan passed."

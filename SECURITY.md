@@ -6,6 +6,12 @@
 - **JWT** is used for stateless authentication. The signing key is configured via `civiclens.jwt.secret`; in production, set `JWT_SECRET` to a long, random value (at least 32 characters for HS256).
 - Use **HTTPS** in production and keep the JWT secret secure.
 
+## Database credentials
+
+- Do not commit database credentials in source files.
+- Local setup scripts generate a repo-root `.env.local` (gitignored) containing `CIVICLENS_DB_USER`, `CIVICLENS_DB_PASSWORD`, and `CIVICLENS_DB_NAME`.
+- For manual runs, export these environment variables before starting Postgres/backend.
+
 ## SAST (Semgrep)
 
 CI runs Semgrep with rulesets such as `p/owasp-top-ten`, `p/java`, and `p/react`. To run locally:
@@ -16,6 +22,19 @@ semgrep scan --config p/owasp-top-ten --config p/java --config p/react .
 ```
 
 Review and fix any findings; document exceptions if necessary.
+
+## Secret scanning (Gitleaks)
+
+- Secret scanning is enforced in two places:
+  - **Pre-commit hook** (installed by setup scripts) runs `gitleaks` on staged changes.
+  - **CI** runs `gitleaks` on pushes and pull requests.
+- Manual run examples:
+
+```bash
+gitleaks git --staged --redact
+# or
+gitleaks detect --source . --redact
+```
 
 ## DAST and network scans
 

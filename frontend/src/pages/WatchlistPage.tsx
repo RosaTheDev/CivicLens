@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Stack, Text, Badge, Group, Loader } from '@mantine/core'
+import { Card, Stack, Text, Badge, Group, Loader, Avatar } from '@mantine/core'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -10,6 +10,7 @@ type Representative = {
   state: string
   district?: string | null
   party?: string | null
+  photoUrl?: string | null
 }
 
 type StanceSummary = {
@@ -66,7 +67,10 @@ export default function WatchlistPage() {
 
   return (
     <Stack gap="md">
-      <Text fw={600} size="lg">My watchlist</Text>
+      <div>
+        <Text fw={700} size="xl">My watchlist</Text>
+        <Text size="sm" c="dimmed">Keep track of representatives you care about and your saved stances.</Text>
+      </div>
       {watchlist.length === 0 ? (
         <Text c="dimmed">There are no representatives on your watch list :)</Text>
       ) : (
@@ -78,6 +82,8 @@ export default function WatchlistPage() {
                 key={rep.id}
                 withBorder
                 padding="md"
+                radius="md"
+                shadow="xs"
                 component={Link}
                 to={`/representatives/${rep.id}`}
                 style={{
@@ -98,15 +104,20 @@ export default function WatchlistPage() {
                 }}
               >
                 <Group justify="space-between">
-                  <div>
-                    <Text fw={600}>{rep.name}</Text>
-                    <Group gap="xs">
-                      <Badge size="sm" variant="light">{rep.chamber}</Badge>
-                      <Badge size="sm" variant="outline">{rep.state}</Badge>
-                      {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
-                      {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
-                    </Group>
-                  </div>
+                  <Group gap="sm">
+                    <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
+                      {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </Avatar>
+                    <div>
+                      <Text fw={600}>{rep.name}</Text>
+                      <Group gap="xs">
+                        <Badge size="sm" variant="light">{rep.chamber}</Badge>
+                        <Badge size="sm" variant="outline">{rep.state}</Badge>
+                        {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
+                        {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
+                      </Group>
+                    </div>
+                  </Group>
                 </Group>
               </Card>
             )

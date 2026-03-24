@@ -6,7 +6,7 @@ CivicLens is a fullstack capstone application that helps users discover their lo
 
 - **Backend:** Java 17, Spring Boot 3, Spring Security (JWT), Spring Data JPA, PostgreSQL, OpenAPI/Swagger
 - **Frontend:** React, TypeScript, Vite, React Router
-- **Infrastructure:** Colima (Postgres via Docker Compose), GitHub Actions (CI, tests, Semgrep, optional image build)
+- **Infrastructure:** Docker Compose (Postgres), Colima on macOS, Docker Desktop on Windows, GitHub Actions (CI, tests, Semgrep, optional image build)
 
 ## Repository structure
 
@@ -17,38 +17,80 @@ CivicLens is a fullstack capstone application that helps users discover their lo
 
 ## Prerequisites
 
-- Git ≥2.40, Node ≥18 LTS, Java 17, Colima + docker-compose (optional, for Postgres)
+- Git ≥2.40
+- Node ≥18 LTS
+- Java 17 + Maven
+- Docker runtime for local Postgres:
+  - **macOS:** Colima + Docker CLI/Compose
+  - **Windows:** Docker Desktop (WSL2 backend recommended)
 - `curl` or Postman for API testing
 
-## Quick start
+## Colima on macOS (what and why)
 
-### 1. Database (optional: Colima)
+`Colima` (Container on Lima) is a lightweight Linux VM that runs Docker containers on macOS.  
+This project uses it so Postgres can run locally via Docker Compose without requiring Docker Desktop.
 
-With [Colima](https://github.com/abiosoft/colima) running, start Postgres using Docker Compose:
+The macOS setup script now handles runtime setup automatically:
+
+- detects available runtime tools (`colima`, Docker-compatible engine including Rancher Desktop, or `podman`)
+- uses one of those automatically and only stops containers that conflict on port `55432`
+- if none are installed, prompts you to install one (`Colima`, `Docker Desktop`, `Rancher Desktop`, or `Podman`)
+
+## Quick start scripts (recommended)
+
+From the repo root, run:
+
+### macOS
+
+```bash
+chmod +x scripts/setup-and-run-mac.sh
+./scripts/setup-and-run-mac.sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-and-run-windows.ps1
+```
+
+Both scripts:
+
+- detect and initialize a supported container runtime automatically
+- if no runtime is installed, prompt to install one and continue setup
+- stop only conflicting resources used by CivicLens (containers on `55432`, host listeners on `8080`, `5173`, and `55432`)
+- generate local DB credentials in repo-root `.env.local` (gitignored) if missing
+- install a Git pre-commit hook that runs `gitleaks` on staged changes to catch secrets before commit
+- install project dependencies (`npm install`, Maven dependency prefetch)
+- reset/start this project's Postgres with Docker Compose (`civiclens` compose project)
+- start backend (`http://localhost:8080`)
+- start frontend (`http://localhost:5173`)
+- wait for health checks, print a clear "CivicLens is running" success banner, and auto-open the frontend URL in your default browser
+
+## Manual quick start
+
+### 1. Database
 
 ```bash
 cd infra
-docker-compose up -d
+docker compose up -d
 ```
 
-Postgres will be available at `localhost:5432` (default user/password/db as in `docker-compose.yml`).
+Postgres is exposed on `localhost:55432` (user/password/db in `infra/docker-compose.yml`).
+
+If you are running manually (without scripts), set database env vars first:
+
+```bash
+export CIVICLENS_DB_USER="civiclens"
+export CIVICLENS_DB_PASSWORD="your-local-db-password"
+export CIVICLENS_DB_NAME="civiclens"
+```
 
 ### 2. Backend
 
 ```bash
 cd backend
-# Set DB URL if not using Colima, e.g. in application.yml or env:
-# SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/civiclens
 mvn spring-boot:run
 ```
-
-- API base: `http://localhost:8080`
-- REST endpoints (examples):
-  - `GET /api/representatives?zip=94110` – reps by ZIP
-  - `GET /api/watchlist` – current user's watchlist
-  - `GET /api/donor-summaries?representativeId=1` – donor summary
-  - `POST /api/stances` – save stance (form-encoded)
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ### 3. Frontend
 
@@ -58,7 +100,28 @@ npm install
 npm run dev
 ```
 
+- API base: `http://localhost:8080`
 - App: `http://localhost:5173`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+## Windows notes
+
+- This repo is fully runnable on Windows with Docker-compatible runtime tools.
+- The Windows script detects available runtime tools (`docker`/Docker Desktop or Rancher, `podman`, optional `colima` in WSL scenarios).
+- If no runtime is present, it prompts for an install choice and continues.
+- It stops only containers already occupying port `55432`, then starts CivicLens cleanly.
+- If you hit line-ending issues in scripts, use PowerShell and run from the repository root.
+- If backend cannot connect to Postgres, verify port `55432` is available and container `civiclens-postgres` is healthy.
+
+## Windows alternatives if Docker Desktop is unavailable
+
+If Docker Desktop cannot be used in your environment (licensing, policy, admin restrictions), common alternatives are:
+
+- **[Rancher Desktop](https://rancherdesktop.io/)** with `dockerd (moby)` enabled for Docker-compatible workflows.
+- **[Podman Desktop](https://podman-desktop.io/)** with Podman Compose (or Docker-compat mode where available).
+- **[Colima in WSL2 Linux](https://github.com/abiosoft/colima)** by running this project from a Linux distro inside WSL2.
+
+For this repository, Docker-compatible `compose` support is required because the local database is managed via `infra/docker-compose.yml`.
 
 ## Representative data (ZIP → reps)
 
@@ -120,12 +183,16 @@ If you want the **Recent bills on Congress.gov** section on the representative d
 
 With the key set, the backend will use the Congress.gov API to show the **three most recent sponsored/cosponsored bills** per representative, each with a real title, short description, and a link directly to that bill on `congress.gov`.
 
+CivicLens also resolves and caches each representative's **official photo URL** and displays it in the dashboard, watchlist, and detail cards.  
+It first tries Congress.gov (when `CONGRESS_API_KEY` is set), then falls back to the public `congress-legislators` dataset so photos can still load in many cases without an API key.
+
 ## Running tests
 
 - **Backend:** `cd backend && mvn test` (JaCoCo report in `target/site/jacoco/`)
 - **Frontend:** `cd frontend && npm test -- --coverage` (report in `frontend/coverage/`)
 - **Lint:** `cd frontend && npm run lint`
 - **Semgrep:** `semgrep scan --config p/owasp-top-ten .` (from repo root)
+- **Gitleaks (secrets):** `gitleaks git --staged --redact` (or `gitleaks detect --source . --redact`)
 
 ## Security considerations
 

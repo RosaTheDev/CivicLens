@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -76,7 +75,40 @@ public class CongressGovClient {
         }
     }
 
+    public String fetchMemberPhotoUrl(Representative representative) {
+        if (apiKey == null || apiKey.isBlank() || representative == null) {
+            return null;
+        }
+        try {
+            JsonNode member = resolveMemberNode(representative);
+            if (member == null) {
+                return null;
+            }
+            String imageUrl = member.path("depiction").path("imageUrl").asText(null);
+            if (imageUrl != null && !imageUrl.isBlank()) {
+                return imageUrl.trim();
+            }
+            String bioguideId = member.path("bioguideId").asText(null);
+            if (bioguideId == null || bioguideId.isBlank()) {
+                return null;
+            }
+            return "https://theunitedstates.io/images/congress/225x275/" + bioguideId.trim().toUpperCase(Locale.ROOT) + ".jpg";
+        } catch (Exception e) {
+            log.warn("Congress.gov API photo lookup failed for representative {}: {}", representative.getName(), e.getMessage());
+            return null;
+        }
+    }
+
     private String resolveBioguideId(Representative representative) throws URISyntaxException {
+        JsonNode member = resolveMemberNode(representative);
+        if (member == null) {
+            return null;
+        }
+        String bioguideId = member.path("bioguideId").asText(null);
+        return (bioguideId == null || bioguideId.isBlank()) ? null : bioguideId;
+    }
+
+    private JsonNode resolveMemberNode(Representative representative) throws URISyntaxException {
         String stateCode = representative.getState();
         if (stateCode == null || stateCode.isBlank()) {
             return null;
@@ -107,22 +139,14 @@ public class CongressGovClient {
         String repLastName = lastNameOf(representative.getName());
         for (JsonNode member : members) {
             String invertedName = member.path("invertedOrderName").asText(""); // "Last, First"
-            String stateName = member.path("state").asText("");
             String chamber = firstChamberFromTerms(member);
             if (!chamberFilter.equals(chamber)) {
-                continue;
-            }
-            if (!stateName.isEmpty() && !stateName.toUpperCase(Locale.ROOT).startsWith(stateCode.toUpperCase(Locale.ROOT))) {
-                // state mismatch; Congress.gov uses full state name here
                 continue;
             }
             if (!repLastName.isEmpty() && !invertedName.toLowerCase(Locale.ROOT).startsWith(repLastName.toLowerCase(Locale.ROOT))) {
                 continue;
             }
-            String bioguideId = member.path("bioguideId").asText(null);
-            if (bioguideId != null && !bioguideId.isBlank()) {
-                return bioguideId;
-            }
+            return member;
         }
         return null;
     }
