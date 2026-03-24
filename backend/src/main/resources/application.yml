@@ -31,6 +31,8 @@ civiclens:
   congress:
     api-base-url: https://api.congress.gov/v3
     api-key: ${CONGRESS_API_KEY:}
+  voting:
+    google-civic-api-key: ${GOOGLE_CIVIC_API_KEY:}
 
 springdoc:
   api-docs:

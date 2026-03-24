@@ -185,17 +185,17 @@ export default function RepresentativeDetailPage() {
       >
         <Group justify="space-between" align="flex-start" className="civic-detail-header">
           <div className="civic-detail-identity">
-            <Text fw={700} size="xl" className="civic-heading">{rep.name}</Text>
+            <Text fw={700} size="xl" className="civic-heading civic-rep-detail-name">{rep.name}</Text>
             {rep.officialUrl && (
-              <Text mt={4} size="sm" className="civic-detail-link">
+              <Text mt={4} size="md" className="civic-detail-link civic-detail-link--prominent">
                 <a href={rep.officialUrl} target="_blank" rel="noreferrer">Official website</a>
               </Text>
             )}
             <Group gap="xs" mt="xs" className="civic-detail-metadata">
-              <Badge className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
-              <Badge variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
-              {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
-              {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
+              <Badge size="lg" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+              <Badge size="lg" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
+              {rep.district && <Text size="md" c="dimmed">District {rep.district}</Text>}
+              {rep.party && <Text size="md" c="dimmed">{rep.party}</Text>}
             </Group>
             {savedNote ? (
               <Text mt="xs" size="sm" c="dimmed">{savedNote}</Text>
@@ -208,21 +208,22 @@ export default function RepresentativeDetailPage() {
             ) : null}
           </div>
           <Group gap="sm">
-            <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue" size="lg">
+            <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue" size={96} className="civic-rep-detail-avatar">
               {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
             </Avatar>
             <Button
+              size="lg"
               variant={onWatchlist ? 'outline' : 'filled'}
               onClick={handleWatchlist}
               disabled={togglingWatchlist}
-                className="civic-action-button"
+              className="civic-action-button civic-watchlist-button"
             >
               {onWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
             </Button>
           </Group>
         </Group>
         <div className="civic-detail-divider" />
-        <Text mt="sm" size="sm" c="dimmed" className="civic-detail-bio">
+        <Text mt="sm" size="md" c="dimmed" className="civic-detail-bio">
           {buildRepresentativeBio(rep)}
         </Text>
       </Card>

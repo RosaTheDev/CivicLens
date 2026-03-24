@@ -85,12 +85,12 @@ export default function DashboardPage() {
       {submittedZip && !loading && representatives.length === 0 && (
         <Text c="dimmed">No representatives found for this ZIP. Try 94110 or 10001 for demo data.</Text>
       )}
-      <Stack gap="sm">
+      <Stack gap="md">
         {representatives.map((rep) => (
           <Card
             key={rep.id}
             withBorder
-            padding="md"
+            padding="lg"
             radius="md"
             shadow="xs"
             className="civic-glass-card civic-rep-card"
@@ -100,19 +100,19 @@ export default function DashboardPage() {
           >
             <Group justify="space-between" className="civic-list-card-body">
               <Group gap="sm" align="flex-start">
-                <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
+                <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue" size={72} className="civic-list-avatar">
                   {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                 </Avatar>
                 <div>
-                  <Text fw={600}>{rep.name}</Text>
+                  <Text fw={700} className="civic-list-name">{rep.name}</Text>
                   <Group gap="xs" className="civic-list-meta">
-                    <Badge size="sm" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
-                    <Badge size="sm" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
-                    {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
-                    {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
+                    <Badge size="lg" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+                    <Badge size="lg" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
+                    {rep.district && <Text size="lg" c="dimmed" className="civic-list-detail">District {rep.district}</Text>}
+                    {rep.party && <Text size="lg" c="dimmed" className="civic-list-detail">{rep.party}</Text>}
                   </Group>
                   <div className="civic-list-divider" />
-                  <Text size="sm" c="dimmed">
+                  <Text size="lg" c="dimmed" className="civic-list-summary">
                     Open profile to review recent bills, donor context, and your stance.
                   </Text>
                 </div>

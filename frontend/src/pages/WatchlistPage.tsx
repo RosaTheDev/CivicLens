@@ -74,14 +74,14 @@ export default function WatchlistPage() {
       {watchlist.length === 0 ? (
         <Text c="dimmed">There are no representatives on your watch list :)</Text>
       ) : (
-        <Stack gap="sm">
+        <Stack gap="md">
           {watchlist.map((rep) => {
             const stance = stanceMap[rep.id]
             return (
               <Card
                 key={rep.id}
                 withBorder
-                padding="md"
+                padding="lg"
                 radius="md"
                 shadow="xs"
                 className="civic-glass-card civic-rep-card"
@@ -106,19 +106,19 @@ export default function WatchlistPage() {
               >
                 <Group justify="space-between" className="civic-list-card-body">
                   <Group gap="sm" align="flex-start">
-                    <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
+                    <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue" size={72} className="civic-list-avatar">
                       {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                     </Avatar>
                     <div>
-                      <Text fw={600}>{rep.name}</Text>
+                      <Text fw={700} className="civic-list-name">{rep.name}</Text>
                       <Group gap="xs" className="civic-list-meta">
-                        <Badge size="sm" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
-                        <Badge size="sm" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
-                        {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
-                        {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
+                        <Badge size="lg" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+                        <Badge size="lg" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
+                        {rep.district && <Text size="lg" c="dimmed" className="civic-list-detail">District {rep.district}</Text>}
+                        {rep.party && <Text size="lg" c="dimmed" className="civic-list-detail">{rep.party}</Text>}
                       </Group>
                       <div className="civic-list-divider" />
-                      <Text size="sm" c="dimmed">
+                      <Text size="lg" c="dimmed" className="civic-list-summary">
                         View profile to update stance notes and watchlist details.
                       </Text>
                     </div>
