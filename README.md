@@ -59,6 +59,7 @@ Both scripts:
 - if no runtime is installed, prompt to install one and continue setup
 - stop only conflicting resources used by CivicLens (containers on `55432`, host listeners on `8080`, `5173`, and `55432`)
 - generate local DB credentials in repo-root `.env.local` (gitignored) if missing
+- auto-reconcile DB password drift with existing local Postgres volumes (legacy fallback + safe reset when needed)
 - install a Git pre-commit hook that runs `gitleaks` on staged changes to catch secrets before commit
 - install project dependencies (`npm install`, Maven dependency prefetch)
 - reset/start this project's Postgres with Docker Compose (`civiclens` compose project)

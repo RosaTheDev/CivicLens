@@ -40,9 +40,16 @@ export default function LoginPage() {
 
   return (
     <Stack align="center" justify="center" style={{ minHeight: '80vh' }}>
-      <Paper p="xl" shadow="sm" withBorder w={360}>
-        <Title order={2} mb="md">Sign in</Title>
-        <form onSubmit={handleSubmit}>
+      <div className="civic-auth-hero">
+        <Text fw={700} className="civic-heading" size="lg">Welcome back to CivicLens</Text>
+        <Text size="sm" c="dimmed">Track your representatives, compare their priorities, and keep your civic notes in one place.</Text>
+      </div>
+      <Paper p="xl" shadow="sm" withBorder w={380} className="civic-glass-card civic-auth-card">
+        <Title order={2} mb="md" className="civic-heading">Sign in</Title>
+        <Text size="sm" className="civic-auth-helper" mb="md">
+          Use the email and password you registered with.
+        </Text>
+        <form onSubmit={handleSubmit} className="civic-auth-form">
           <Stack gap="md">
             <TextInput
               label="Email"
@@ -51,6 +58,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
+              autoComplete="email"
             />
             <PasswordInput
               label="Password"
@@ -58,11 +66,12 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              autoComplete="current-password"
             />
-            {error && <Text c="red" size="sm">{error}</Text>}
-            <Button type="submit" loading={loading} fullWidth>Sign in</Button>
+            {error && <Text c="red" size="sm" className="civic-error-text" role="alert">{error}</Text>}
+            <Button type="submit" loading={loading} fullWidth className="civic-action-button">Sign in</Button>
             <Text size="sm" c="dimmed">
-              Don't have an account? <Link to="/register">Register</Link>
+              Don't have an account? <Link className="civic-auth-link" to="/register">Register</Link>
             </Text>
           </Stack>
         </form>

@@ -71,6 +71,13 @@ function Save-EnvFile {
   ) | Set-Content -Path $EnvFile -Encoding ascii
 }
 
+function Set-DbPassword {
+  param([string]$Password)
+  $env:CIVICLENS_DB_PASSWORD = $Password
+  Save-EnvFile -DbUser $env:CIVICLENS_DB_USER -DbPassword $env:CIVICLENS_DB_PASSWORD -DbName $env:CIVICLENS_DB_NAME
+  $env:SPRING_DATASOURCE_PASSWORD = $env:CIVICLENS_DB_PASSWORD
+}
+
 function Ensure-DbSecrets {
   $values = Load-EnvFile
   $dbUser = if ($values.ContainsKey("CIVICLENS_DB_USER")) { $values["CIVICLENS_DB_USER"] } else { "civiclens" }
@@ -89,6 +96,71 @@ function Ensure-DbSecrets {
   $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:55432/$dbName"
   $env:SPRING_DATASOURCE_USERNAME = $dbUser
   $env:SPRING_DATASOURCE_PASSWORD = $dbPassword
+}
+
+function Test-DbLogin {
+  param([string]$Password)
+  if ($script:ComposeEngine -eq "docker") {
+    docker exec -e PGPASSWORD=$Password -e PGCONNECT_TIMEOUT=2 civiclens-postgres psql -h 127.0.0.1 -p 5432 -U $env:CIVICLENS_DB_USER -d $env:CIVICLENS_DB_NAME -c "select 1" | Out-Null
+    return ($LASTEXITCODE -eq 0)
+  }
+  podman exec -e PGPASSWORD=$Password -e PGCONNECT_TIMEOUT=2 civiclens-postgres psql -h 127.0.0.1 -p 5432 -U $env:CIVICLENS_DB_USER -d $env:CIVICLENS_DB_NAME -c "select 1" | Out-Null
+  return ($LASTEXITCODE -eq 0)
+}
+
+function Test-DbLoginWithRetry {
+  param(
+    [string]$Password,
+    [int]$Attempts = 20
+  )
+
+  for ($i = 0; $i -lt $Attempts; $i++) {
+    if (Test-DbLogin -Password $Password) {
+      return $true
+    }
+    Start-Sleep -Seconds 1
+  }
+  return $false
+}
+
+function Sync-DbRolePassword {
+  $escapedPassword = $env:CIVICLENS_DB_PASSWORD.Replace("'", "''")
+  $sql = "ALTER ROLE `"$($env:CIVICLENS_DB_USER)`" WITH PASSWORD '$escapedPassword';"
+  if ($script:ComposeEngine -eq "docker") {
+    docker exec civiclens-postgres psql -h 127.0.0.1 -p 5432 -U $env:CIVICLENS_DB_USER -d postgres -v ON_ERROR_STOP=1 -c $sql | Out-Null
+    return ($LASTEXITCODE -eq 0)
+  }
+  podman exec civiclens-postgres psql -h 127.0.0.1 -p 5432 -U $env:CIVICLENS_DB_USER -d postgres -v ON_ERROR_STOP=1 -c $sql | Out-Null
+  return ($LASTEXITCODE -eq 0)
+}
+
+function Reconcile-DbCredentials {
+  Write-Log "Validating database credentials..."
+  if (Test-DbLoginWithRetry -Password $env:CIVICLENS_DB_PASSWORD -Attempts 30) {
+    if (-not (Sync-DbRolePassword)) {
+      throw "[setup-windows] Unable to synchronize database role password."
+    }
+    Write-Log "Database credentials are valid."
+    return
+  }
+
+  if ($env:CIVICLENS_DB_PASSWORD -ne "civiclens" -and (Test-DbLoginWithRetry -Password "civiclens" -Attempts 10)) {
+    Write-Log "Detected existing DB volume with legacy password; updating local .env.local."
+    Set-DbPassword -Password "civiclens"
+    if (-not (Sync-DbRolePassword)) {
+      throw "[setup-windows] Unable to synchronize database role password after legacy fallback."
+    }
+    return
+  }
+
+  Write-Log "Unable to authenticate with existing DB data. Recreating Postgres volume..."
+  Push-Location "$RootDir/infra"
+  Invoke-Compose -Args @("-p", "civiclens", "down", "-v", "--remove-orphans")
+  Invoke-Compose -Args @("-p", "civiclens", "up", "-d")
+  Pop-Location
+  if (-not (Test-DbLoginWithRetry -Password $env:CIVICLENS_DB_PASSWORD -Attempts 40) -or -not (Sync-DbRolePassword)) {
+    throw "[setup-windows] Postgres credential reconciliation failed."
+  }
 }
 
 function Ensure-GitleaksInstalled {
@@ -447,6 +519,7 @@ Push-Location "$RootDir/infra"
 Invoke-Compose -Args @("-p", "civiclens", "down", "--remove-orphans")
 Invoke-Compose -Args @("-p", "civiclens", "up", "-d")
 Pop-Location
+Reconcile-DbCredentials
 
 Write-Log "Starting backend API in background..."
 $backendJob = Start-Job -Name "CivicLensBackend" -ScriptBlock {

@@ -41,9 +41,16 @@ export default function RegisterPage() {
 
   return (
     <Stack align="center" justify="center" style={{ minHeight: '80vh' }}>
-      <Paper p="xl" shadow="sm" withBorder w={360}>
-        <Title order={2} mb="md">Create account</Title>
-        <form onSubmit={handleSubmit}>
+      <div className="civic-auth-hero">
+        <Text fw={700} className="civic-heading" size="lg">Join CivicLens</Text>
+        <Text size="sm" c="dimmed">Build a personal civic record with representative profiles, bill tracking, and your own stance notes.</Text>
+      </div>
+      <Paper p="xl" shadow="sm" withBorder w={380} className="civic-glass-card civic-auth-card">
+        <Title order={2} mb="md" className="civic-heading">Create account</Title>
+        <Text size="sm" className="civic-auth-helper" mb="md">
+          Create a secure account to save your civic preferences.
+        </Text>
+        <form onSubmit={handleSubmit} className="civic-auth-form">
           <Stack gap="md">
             <TextInput
               label="Email"
@@ -52,12 +59,14 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
+              autoComplete="email"
             />
             <TextInput
               label="Display name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Optional"
+              autoComplete="nickname"
             />
             <PasswordInput
               label="Password"
@@ -65,11 +74,13 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="At least 8 characters"
+              autoComplete="new-password"
+              description="Use at least 8 characters."
             />
-            {error && <Text c="red" size="sm">{error}</Text>}
-            <Button type="submit" loading={loading} fullWidth>Register</Button>
+            {error && <Text c="red" size="sm" className="civic-error-text" role="alert">{error}</Text>}
+            <Button type="submit" loading={loading} fullWidth className="civic-action-button">Register</Button>
             <Text size="sm" c="dimmed">
-              Already have an account? <Link to="/login">Sign in</Link>
+              Already have an account? <Link className="civic-auth-link" to="/login">Sign in</Link>
             </Text>
           </Stack>
         </form>

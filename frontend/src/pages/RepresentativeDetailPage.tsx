@@ -105,6 +105,15 @@ export default function RepresentativeDetailPage() {
 
   const onWatchlist = repId != null && watchlistIds.includes(String(repId))
 
+  function buildRepresentativeBio(representative: Representative): string {
+    const chamberLabel = representative.chamber.toLowerCase() === 'senate'
+      ? 'U.S. Senate'
+      : 'U.S. House of Representatives'
+    const districtSegment = representative.district ? `, representing district ${representative.district}` : ''
+    const partySegment = representative.party ? ` and is affiliated with the ${representative.party} party` : ''
+    return `${representative.name} serves in the ${chamberLabel} for ${representative.state}${districtSegment}${partySegment}. This profile helps you track their recent legislative activity, campaign influence signals, and your own stance notes in one place.`
+  }
+
   if (loading || !rep) {
     return loading ? <Loader /> : <Text>Representative not found.</Text>
   }
@@ -152,12 +161,13 @@ export default function RepresentativeDetailPage() {
 
   return (
     <Stack gap="md">
-      <Button component={Link} to="/" variant="subtle" size="sm">← Back to dashboard</Button>
+      <Button component={Link} to="/" variant="subtle" size="sm" className="civic-nav-button">← Back to dashboard</Button>
       <Card
         withBorder
         padding="lg"
         radius="md"
         shadow="xs"
+        className="civic-glass-card"
         style={{
           borderColor:
             savedStance === 'SUPPORT'
@@ -173,13 +183,18 @@ export default function RepresentativeDetailPage() {
               : undefined,
         }}
       >
-        <Group justify="space-between">
-          <div>
-            <Text fw={700} size="xl">{rep.name}</Text>
-            <Group gap="xs" mt="xs">
-              <Badge>{rep.chamber}</Badge>
-              <Badge variant="outline">{rep.state}</Badge>
-              {rep.district && <Text size="sm">District {rep.district}</Text>}
+        <Group justify="space-between" align="flex-start" className="civic-detail-header">
+          <div className="civic-detail-identity">
+            <Text fw={700} size="xl" className="civic-heading">{rep.name}</Text>
+            {rep.officialUrl && (
+              <Text mt={4} size="sm" className="civic-detail-link">
+                <a href={rep.officialUrl} target="_blank" rel="noreferrer">Official website</a>
+              </Text>
+            )}
+            <Group gap="xs" mt="xs" className="civic-detail-metadata">
+              <Badge className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+              <Badge variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
+              {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
               {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
             </Group>
             {savedNote ? (
@@ -187,7 +202,7 @@ export default function RepresentativeDetailPage() {
             ) : savedStance === 'SUPPORT' ? (
               <Text mt="xs" size="sm" c="green">I SUPPORT</Text>
             ) : savedStance === 'OPPOSE' ? (
-              <Text mt="xs" size="sm" c="red">BOOOOOOOOO THIS PERSON SUCKS</Text>
+              <Text mt="xs" size="sm" c="red">I OPPOSE</Text>
             ) : savedStance === 'NEUTRAL' ? (
               <Text mt="xs" size="sm" c="dimmed">Neutral</Text>
             ) : null}
@@ -200,31 +215,20 @@ export default function RepresentativeDetailPage() {
               variant={onWatchlist ? 'outline' : 'filled'}
               onClick={handleWatchlist}
               disabled={togglingWatchlist}
+                className="civic-action-button"
             >
               {onWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
             </Button>
           </Group>
         </Group>
-        {rep.officialUrl && (
-          <Text mt="md" size="sm">
-            <a href={rep.officialUrl} target="_blank" rel="noreferrer">Official link</a>
-          </Text>
-        )}
-        <Text mt="xs" size="sm" c="dimmed">
-          Bills and detailed voting history are available on{' '}
-          <a
-            href={`https://www.congress.gov/search?q=${encodeURIComponent(`{"source":"legislation","search":"${rep.name} ${rep.state}"}`)}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Congress.gov
-          </a>
-          .
+        <div className="civic-detail-divider" />
+        <Text mt="sm" size="sm" c="dimmed" className="civic-detail-bio">
+          {buildRepresentativeBio(rep)}
         </Text>
       </Card>
 
       {donor && (
-        <Card withBorder padding="lg">
+        <Card withBorder padding="lg" className="civic-glass-card">
           <Text fw={600} mb="sm">Donor summary (mock)</Text>
           <Stack gap="xs">
             <Text size="sm">Source: {donor.source} {donor.cycleYear && `(${donor.cycleYear})`}</Text>
@@ -237,7 +241,7 @@ export default function RepresentativeDetailPage() {
       )}
 
       {recentBills.length > 0 && (
-        <Card withBorder padding="lg">
+        <Card withBorder padding="lg" className="civic-glass-card">
           <Text fw={600} mb="sm">Recent bills on Congress.gov</Text>
           <Stack gap="sm">
             {recentBills.map((bill) => (
@@ -245,6 +249,7 @@ export default function RepresentativeDetailPage() {
                 key={bill.url}
                 withBorder
                 padding="md"
+                className="civic-glass-card civic-rep-card"
                 component="a"
                 href={bill.url}
                 target="_blank"
@@ -259,7 +264,7 @@ export default function RepresentativeDetailPage() {
         </Card>
       )}
 
-      <Card withBorder padding="lg">
+      <Card withBorder padding="lg" className="civic-glass-card">
         <Text fw={600} mb="sm">Your stance</Text>
         <Stack gap="sm">
           <Select
@@ -273,7 +278,7 @@ export default function RepresentativeDetailPage() {
             onChange={setStance}
           />
           <Textarea placeholder="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} minRows={2} />
-          <Button onClick={handleSetStance} disabled={!stance || savingStance}>Save stance</Button>
+          <Button onClick={handleSetStance} disabled={!stance || savingStance} className="civic-action-button">Save stance</Button>
         </Stack>
       </Card>
     </Stack>

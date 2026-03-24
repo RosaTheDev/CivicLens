@@ -1,0 +1,306 @@
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 700px at 50% -200px, rgba(255, 255, 255, 0.4), transparent 65%),
+    linear-gradient(180deg, #efe3c7 0%, #e8d9b9 56%, #ddcca7 100%);
+  background-attachment: fixed;
+  color: #2f2a22;
+}
+
+.civic-wordmark {
+  font-family: "Merriweather", Georgia, Cambria, "Times New Roman", serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2c2218;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.civic-heading {
+  font-family: "Merriweather", Georgia, Cambria, "Times New Roman", serif;
+  letter-spacing: 0.02em;
+  color: #2f261d;
+}
+
+.civic-app-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.civic-header {
+  border-top: 3px solid rgba(118, 28, 36, 0.82);
+  border-bottom: 2px solid rgba(38, 58, 86, 0.7);
+  background: linear-gradient(180deg, rgba(249, 241, 224, 0.95), rgba(241, 229, 204, 0.94));
+}
+
+.civic-header::before {
+  content: none;
+}
+
+.civic-header::after {
+  content: none;
+}
+
+.civic-main {
+  position: relative;
+  min-height: calc(100vh - 64px);
+  padding-bottom: 28px;
+}
+
+.civic-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.civic-ambient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(800px 400px at -10% 30%, rgba(57, 41, 20, 0.08), transparent 72%),
+    radial-gradient(900px 420px at 110% 65%, rgba(106, 27, 35, 0.07), transparent 72%);
+}
+
+.civic-ambient::after {
+  content: none;
+}
+
+.civic-orb {
+  display: none;
+}
+
+.civic-orb--one {
+  display: none;
+}
+
+.civic-orb--two {
+  display: none;
+}
+
+.civic-orb--three {
+  display: none;
+}
+
+.civic-content {
+  position: relative;
+  z-index: 1;
+}
+
+.civic-pill {
+  letter-spacing: 0.08em;
+  background: #e8d6b2;
+  color: #573920;
+  border: 1px solid rgba(87, 57, 32, 0.32);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.civic-glass-card {
+  background: linear-gradient(180deg, rgba(252, 246, 234, 0.95), rgba(244, 233, 209, 0.95));
+  border: 1px solid rgba(104, 81, 49, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 6px 14px rgba(83, 64, 37, 0.15);
+  transition: transform 140ms ease, box-shadow 180ms ease, border-color 160ms ease;
+}
+
+.civic-rep-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(118, 28, 36, 0.42);
+  box-shadow: 0 10px 22px rgba(83, 64, 37, 0.18);
+}
+
+.civic-rep-card:focus-visible,
+.civic-rep-card:focus-within {
+  outline: 3px solid rgba(118, 28, 36, 0.42);
+  outline-offset: 2px;
+  border-color: rgba(118, 28, 36, 0.45);
+  box-shadow: 0 0 0 3px rgba(252, 246, 234, 0.8), 0 10px 22px rgba(83, 64, 37, 0.2);
+}
+
+.civic-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 18px;
+  border: 1px solid rgba(95, 72, 42, 0.3);
+  background: linear-gradient(180deg, rgba(249, 239, 219, 0.96), rgba(238, 222, 191, 0.95));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 8px 18px rgba(83, 64, 37, 0.14);
+}
+
+.civic-hero::after {
+  content: none;
+}
+
+.civic-control-bar {
+  background: rgba(248, 239, 223, 0.95);
+  border: 1px solid rgba(95, 72, 42, 0.28);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(83, 64, 37, 0.14);
+}
+
+.civic-nav-button {
+  border: 1px solid rgba(95, 72, 42, 0.35);
+  background: #f2e6cd;
+  color: #3c3022;
+}
+
+.civic-nav-button:hover {
+  border-color: rgba(118, 28, 36, 0.48);
+  color: #5f1f29;
+}
+
+.civic-nav-button--primary {
+  border-color: rgba(118, 28, 36, 0.45);
+  background: #7b2430;
+  color: #f8f2e7;
+}
+
+.civic-nav-button--primary:hover {
+  background: #651a24;
+  color: #f8f2e7;
+}
+
+.civic-action-button {
+  background: #2f4a72;
+  border: 1px solid rgba(34, 53, 82, 0.55);
+  color: #f7f1e6;
+}
+
+.civic-action-button:hover {
+  background: #263d60;
+}
+
+.civic-badge {
+  letter-spacing: 0.03em;
+  font-weight: 700;
+}
+
+.civic-badge--chamber {
+  background: rgba(47, 74, 114, 0.15);
+  color: #2f4a72;
+  border: 1px solid rgba(47, 74, 114, 0.35);
+}
+
+.civic-badge--state {
+  background: rgba(118, 28, 36, 0.1);
+  color: #6f232d;
+  border: 1px solid rgba(118, 28, 36, 0.34);
+}
+
+.civic-detail-header {
+  gap: 14px;
+}
+
+.civic-detail-identity {
+  max-width: 70%;
+}
+
+.civic-detail-link a {
+  color: #2f4a72;
+  text-decoration-color: rgba(47, 74, 114, 0.5);
+  text-underline-offset: 2px;
+}
+
+.civic-detail-link a:hover {
+  color: #6f232d;
+  text-decoration-color: rgba(111, 35, 45, 0.55);
+}
+
+.civic-detail-link a:focus-visible {
+  outline: 3px solid rgba(118, 28, 36, 0.42);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.civic-detail-metadata {
+  row-gap: 6px;
+}
+
+.civic-detail-divider {
+  margin-top: 12px;
+  border-top: 1px solid rgba(95, 72, 42, 0.26);
+}
+
+.civic-detail-bio {
+  line-height: 1.55;
+  max-width: 82ch;
+}
+
+.civic-list-card-body {
+  width: 100%;
+}
+
+.civic-list-meta {
+  row-gap: 6px;
+}
+
+.civic-list-divider {
+  margin: 10px 0 8px;
+  border-top: 1px solid rgba(95, 72, 42, 0.24);
+}
+
+.civic-auth-hero {
+  max-width: 480px;
+  text-align: center;
+}
+
+.civic-auth-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.civic-auth-link {
+  color: #2f4a72;
+  text-underline-offset: 2px;
+}
+
+.civic-auth-link:hover {
+  color: #6f232d;
+}
+
+.civic-auth-helper {
+  color: #4a3a28;
+  line-height: 1.45;
+}
+
+.civic-error-text {
+  font-weight: 600;
+}
+
+.civic-auth-form .mantine-Input-input:focus,
+.civic-auth-form .mantine-Input-input:focus-visible {
+  outline: 2px solid rgba(47, 74, 114, 0.48);
+  outline-offset: 1px;
+  border-color: rgba(47, 74, 114, 0.6);
+}
+
+.civic-action-button:focus-visible,
+.civic-auth-link:focus-visible,
+.civic-nav-button:focus-visible,
+.civic-wordmark:focus-visible {
+  outline: 3px solid rgba(118, 28, 36, 0.45);
+  outline-offset: 2px;
+}
+
+@keyframes civicFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.03);
+  }
+}

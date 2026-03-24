@@ -55,6 +55,14 @@ CIVICLENS_DB_NAME=${CIVICLENS_DB_NAME}
 EOF
 }
 
+set_db_password() {
+  local new_password="$1"
+  CIVICLENS_DB_PASSWORD="$new_password"
+  write_env_file
+  export CIVICLENS_DB_PASSWORD
+  export SPRING_DATASOURCE_PASSWORD="${CIVICLENS_DB_PASSWORD}"
+}
+
 ensure_db_secrets() {
   load_env_file
   CIVICLENS_DB_USER="${CIVICLENS_DB_USER:-civiclens}"
@@ -68,6 +76,81 @@ ensure_db_secrets() {
   export SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:55432/${CIVICLENS_DB_NAME}"
   export SPRING_DATASOURCE_USERNAME="${CIVICLENS_DB_USER}"
   export SPRING_DATASOURCE_PASSWORD="${CIVICLENS_DB_PASSWORD}"
+}
+
+test_db_login() {
+  local password="$1"
+  if [[ "$COMPOSE_TOOL" == "docker" ]]; then
+    docker exec -e PGPASSWORD="$password" -e PGCONNECT_TIMEOUT=2 civiclens-postgres \
+      psql -h 127.0.0.1 -p 5432 -U "$CIVICLENS_DB_USER" -d "$CIVICLENS_DB_NAME" -c "select 1" >/dev/null 2>&1
+    return $?
+  fi
+  podman exec -e PGPASSWORD="$password" -e PGCONNECT_TIMEOUT=2 civiclens-postgres \
+    psql -h 127.0.0.1 -p 5432 -U "$CIVICLENS_DB_USER" -d "$CIVICLENS_DB_NAME" -c "select 1" >/dev/null 2>&1
+}
+
+test_db_login_with_retries() {
+  local password="$1"
+  local max_attempts="${2:-20}"
+  local attempt=1
+
+  while (( attempt <= max_attempts )); do
+    if test_db_login "$password"; then
+      return 0
+    fi
+    sleep 1
+    ((attempt++))
+  done
+  return 1
+}
+
+sync_db_role_password() {
+  local escaped_password="${CIVICLENS_DB_PASSWORD//\'/\'\'}"
+  local sql="ALTER ROLE \"$CIVICLENS_DB_USER\" WITH PASSWORD '$escaped_password';"
+
+  if [[ "$COMPOSE_TOOL" == "docker" ]]; then
+    docker exec civiclens-postgres psql \
+      -h 127.0.0.1 -p 5432 -U "$CIVICLENS_DB_USER" -d postgres -v ON_ERROR_STOP=1 \
+      -c "$sql" >/dev/null 2>&1
+    return $?
+  fi
+
+  podman exec civiclens-postgres psql \
+    -h 127.0.0.1 -p 5432 -U "$CIVICLENS_DB_USER" -d postgres -v ON_ERROR_STOP=1 \
+    -c "$sql" >/dev/null 2>&1
+}
+
+reconcile_db_credentials() {
+  log "Validating database credentials..."
+  if test_db_login_with_retries "$CIVICLENS_DB_PASSWORD" 30; then
+    if ! sync_db_role_password; then
+      echo "[setup-mac] Unable to synchronize database role password."
+      exit 1
+    fi
+    log "Database credentials are valid."
+    return
+  fi
+
+  if [[ "$CIVICLENS_DB_PASSWORD" != "civiclens" ]] && test_db_login_with_retries "civiclens" 10; then
+    log "Detected existing DB volume with legacy password; updating local .env.local."
+    set_db_password "civiclens"
+    if ! sync_db_role_password; then
+      echo "[setup-mac] Unable to synchronize database role password after legacy fallback."
+      exit 1
+    fi
+    return
+  fi
+
+  log "Unable to authenticate with existing DB data. Recreating Postgres volume..."
+  (
+    cd "$ROOT_DIR/infra"
+    "${COMPOSE_CMD[@]}" --project-name civiclens down -v --remove-orphans >/dev/null 2>&1 || true
+    "${COMPOSE_CMD[@]}" --project-name civiclens up -d
+  )
+  if ! test_db_login_with_retries "$CIVICLENS_DB_PASSWORD" 40 || ! sync_db_role_password; then
+    echo "[setup-mac] Postgres credential reconciliation failed."
+    exit 1
+  fi
 }
 
 ensure_gitleaks_installed() {
@@ -415,6 +498,7 @@ log "Starting Postgres via Docker Compose..."
   "${COMPOSE_CMD[@]}" --project-name civiclens down --remove-orphans >/dev/null 2>&1 || true
   "${COMPOSE_CMD[@]}" --project-name civiclens up -d
 )
+reconcile_db_credentials
 
 log "Starting backend API on http://localhost:8080 ..."
 (cd "$ROOT_DIR/backend" && mvn spring-boot:run) &

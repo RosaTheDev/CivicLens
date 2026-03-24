@@ -67,18 +67,18 @@ export default function DashboardPage() {
 
   return (
     <Stack gap="md">
-      <div>
-        <Text fw={700} size="xl">Find your representatives</Text>
+      <div className="civic-hero">
+        <Text fw={700} size="xl" className="civic-heading">Find your representatives</Text>
         <Text size="sm" c="dimmed">Search by ZIP code to see who represents you and explore their details.</Text>
       </div>
-      <Group>
+      <Group className="civic-control-bar">
         <TextInput
           placeholder="Enter ZIP code"
           value={zip}
           onChange={(e) => setZip(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && search(zip)}
         />
-        <Button onClick={() => search(zip)}>Search</Button>
+        <Button radius="xl" onClick={() => search(zip)} className="civic-action-button">Search</Button>
       </Group>
       {loading && <Loader size="sm" />}
       {error && <Text c="red">{error}</Text>}
@@ -93,27 +93,28 @@ export default function DashboardPage() {
             padding="md"
             radius="md"
             shadow="xs"
+            className="civic-glass-card civic-rep-card"
             component={Link}
             to={`/representatives/${rep.id}`}
-            style={{
-              textDecoration: 'none',
-              color: 'inherit',
-              background: 'color-mix(in srgb, var(--mantine-color-blue-0) 20%, white)',
-            }}
+            style={{ textDecoration: 'none', color: 'inherit' }}
           >
-            <Group justify="space-between">
-              <Group gap="sm">
+            <Group justify="space-between" className="civic-list-card-body">
+              <Group gap="sm" align="flex-start">
                 <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
                   {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                 </Avatar>
                 <div>
                   <Text fw={600}>{rep.name}</Text>
-                  <Group gap="xs">
-                    <Badge size="sm" variant="light">{rep.chamber}</Badge>
-                    <Badge size="sm" variant="outline">{rep.state}</Badge>
+                  <Group gap="xs" className="civic-list-meta">
+                    <Badge size="sm" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+                    <Badge size="sm" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
                     {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
                     {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
                   </Group>
+                  <div className="civic-list-divider" />
+                  <Text size="sm" c="dimmed">
+                    Open profile to review recent bills, donor context, and your stance.
+                  </Text>
                 </div>
               </Group>
             </Group>

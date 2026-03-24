@@ -67,8 +67,8 @@ export default function WatchlistPage() {
 
   return (
     <Stack gap="md">
-      <div>
-        <Text fw={700} size="xl">My watchlist</Text>
+      <div className="civic-hero">
+        <Text fw={700} size="xl" className="civic-heading">My watchlist</Text>
         <Text size="sm" c="dimmed">Keep track of representatives you care about and your saved stances.</Text>
       </div>
       {watchlist.length === 0 ? (
@@ -84,6 +84,7 @@ export default function WatchlistPage() {
                 padding="md"
                 radius="md"
                 shadow="xs"
+                className="civic-glass-card civic-rep-card"
                 component={Link}
                 to={`/representatives/${rep.id}`}
                 style={{
@@ -103,19 +104,23 @@ export default function WatchlistPage() {
                       : undefined,
                 }}
               >
-                <Group justify="space-between">
-                  <Group gap="sm">
+                <Group justify="space-between" className="civic-list-card-body">
+                  <Group gap="sm" align="flex-start">
                     <Avatar src={rep.photoUrl ?? undefined} radius="xl" color="blue">
                       {rep.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                     </Avatar>
                     <div>
                       <Text fw={600}>{rep.name}</Text>
-                      <Group gap="xs">
-                        <Badge size="sm" variant="light">{rep.chamber}</Badge>
-                        <Badge size="sm" variant="outline">{rep.state}</Badge>
+                      <Group gap="xs" className="civic-list-meta">
+                        <Badge size="sm" variant="light" className="civic-badge civic-badge--chamber">{rep.chamber}</Badge>
+                        <Badge size="sm" variant="outline" className="civic-badge civic-badge--state">{rep.state}</Badge>
                         {rep.district && <Text size="sm" c="dimmed">District {rep.district}</Text>}
                         {rep.party && <Text size="sm" c="dimmed">{rep.party}</Text>}
                       </Group>
+                      <div className="civic-list-divider" />
+                      <Text size="sm" c="dimmed">
+                        View profile to update stance notes and watchlist details.
+                      </Text>
                     </div>
                   </Group>
                 </Group>
